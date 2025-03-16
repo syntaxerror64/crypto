@@ -70,10 +70,10 @@ function Install-Containers {
             return
         }
 
-        # Создание рабочей директории
+        # Создание рабочей директории на C:\SupersetPostgres
         $currentStep++
         Write-Progress -Activity "Установка контейнеров" -Status "Шаг ${currentStep} из ${totalSteps}: Создание рабочей директории" -PercentComplete (($currentStep / $totalSteps) * 100)
-        $projectDir = Join-Path $PSScriptRoot "superset-postgres"
+        $projectDir = "C:\SupersetPostgres"
         if (-not (Test-Path $projectDir)) {
             New-Item -ItemType Directory -Path $projectDir -ErrorAction Stop
             Write-Host "Создана директория: $projectDir" -ForegroundColor Green
@@ -188,14 +188,14 @@ function Create-Archive {
 
         $currentStep++
         Write-Progress -Activity "Создание архива" -Status "Шаг ${currentStep} из ${totalSteps}: Создание архива" -PercentComplete (($currentStep / $totalSteps) * 100)
-        $archivePath = "$PWD\pgdata_backup.tar.gz"
-        docker run --rm -v pgdata:/data -v "${PWD}:/backup" ubuntu tar czf /backup/pgdata_backup.tar.gz /data 2>&1 | Out-Null
+        $archivePath = "C:\SupersetPostgres\pgdata_backup.tar.gz"
+        docker run --rm -v pgdata:/data -v "C:\SupersetPostgres:/backup" ubuntu tar czf /backup/pgdata_backup.tar.gz /data 2>&1 | Out-Null
 
         $currentStep++
         Write-Progress -Activity "Создание архива" -Status "Шаг ${currentStep} из ${totalSteps}: Проверка результата" -PercentComplete (($currentStep / $totalSteps) * 100)
         if (Test-Path $archivePath) {
             Write-Host "Архив создан: $archivePath" -ForegroundColor Green
-            explorer.exe $PWD
+            explorer.exe "C:\SupersetPostgres"
         } else {
             Write-Host "Ошибка: Архив не создан." -ForegroundColor Red
         }
@@ -217,8 +217,8 @@ function Extract-Archive {
         $currentStep++
         Write-Progress -Activity "Распаковка архива" -Status "Шаг ${currentStep} из ${totalSteps}: Выбор архива" -PercentComplete (($currentStep / $totalSteps) * 100)
         Write-Host "Выберите архив в открывшемся окне." -ForegroundColor Yellow
-        explorer.exe $PWD
-        $archivePath = Read-Host "Введите полный путь к архиву (например, C:\path\to\pgdata_backup.tar.gz)"
+        explorer.exe "C:\SupersetPostgres"
+        $archivePath = Read-Host "Введите полный путь к архиву (например, C:\SupersetPostgres\pgdata_backup.tar.gz)"
 
         $currentStep++
         Write-Progress -Activity "Распаковка архива" -Status "Шаг ${currentStep} из ${totalSteps}: Проверка пути" -PercentComplete (($currentStep / $totalSteps) * 100)
@@ -246,8 +246,8 @@ function Extract-Archive {
 function Show-WorkData {
     Write-Host "Данные по работе:" -ForegroundColor Green
 
-    # Проверка рабочей директории относительно пути скрипта
-    $projectDir = Join-Path $PSScriptRoot "superset-postgres"
+    # Проверка рабочей директории
+    $projectDir = "C:\SupersetPostgres"
     if (-not (Test-Path $projectDir)) {
         Write-Host "Ошибка: Контейнеры не установлены. Сначала выполните установку (пункт 1)." -ForegroundColor Red
         return
