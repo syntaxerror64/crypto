@@ -106,7 +106,7 @@ SECRET_KEY = '$secretKey'
         Set-Content -Path "superset_config.py" -Value $configFile -Encoding UTF8 -Force -ErrorAction Stop
         Write-Host "Файл superset_config.py создан с SECRET_KEY: $secretKey" -ForegroundColor Green
 
-        # Создание docker-compose.yml с монтированием superset_config.py
+        # Создание docker-compose.yml с установкой OpenSSL в контейнере superset
         $currentStep++
         Write-Progress -Activity "Установка контейнеров" -Status "Шаг ${currentStep} из ${totalSteps}: Создание docker-compose.yml" -PercentComplete (($currentStep / $totalSteps) * 100)
         $composeFile = @"
@@ -133,6 +133,7 @@ services:
       - "8088:8088"
     volumes:
       - ./superset_config.py:/app/superset_config.py
+    command: bash -c "apt-get update && apt-get install -y openssl && /usr/local/bin/superset-entrypoint.sh"
     networks:
       - superset-net
 volumes:
@@ -150,7 +151,7 @@ networks:
         docker-compose up -d 2>&1 | Out-Null
 
         # Ожидание и настройка
-        Start-Sleep -Seconds 30
+        Start-Sleep -Seconds 60  # Увеличиваем время ожидания до 60 секунд для полной инициализации
         $containerName = (docker ps --filter "name=superset-postgres-superset" --format "{{.Names}}")
         if ($containerName) {
             Write-Host "Контейнер Superset запущен: $containerName" -ForegroundColor Green
