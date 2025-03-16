@@ -106,7 +106,7 @@ SECRET_KEY = '$secretKey'
         Set-Content -Path "superset_config.py" -Value $configFile -Encoding UTF8 -Force -ErrorAction Stop
         Write-Host "Файл superset_config.py создан с SECRET_KEY: $secretKey" -ForegroundColor Green
 
-        # Создание docker-compose.yml с установкой OpenSSL
+        # Создание docker-compose.yml с установкой OpenSSL и gosu
         $currentStep++
         Write-Progress -Activity "Установка контейнеров" -Status "Шаг ${currentStep} из ${totalSteps}: Создание docker-compose.yml" -PercentComplete (($currentStep / $totalSteps) * 100)
         $composeFile = @"
@@ -133,7 +133,7 @@ services:
     volumes:
       - ./superset_config.py:/app/superset_config.py
     user: root
-    command: bash -c "apt-get update && apt-get install -y openssl && gosu superset /usr/local/bin/superset-entrypoint.sh"
+    command: bash -c "apt-get update && apt-get install -y openssl gosu && gosu superset /usr/local/bin/superset-entrypoint.sh"
     networks:
       - superset-net
 volumes:
